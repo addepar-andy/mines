@@ -38,7 +38,9 @@ class MineGame(object):
     return c
 
   @property
-  def is_won(self): return (self.steps | self.board).all()
+  def is_won(self): return bool((self.steps | self.board).all())
+  @property
+  def is_lost(self): return bool((self.steps & self.board).any())
 
   def step(self, i, j):
     assert self.active, 'cannot play a completed game'
@@ -53,12 +55,8 @@ class MineGame(object):
     return self.count[i,j]
 
   def show(self):
-    s = ''
-    for i in range(self.shape[0]):
-      for j in range(self.shape[1]):
-        s += str(self.count[i,j]) if self.steps[i,j] else 'X'
-      s += '\n'
-    return s.replace('0', ' ')
+    s = numpy.where(self.steps, numpy.where(self.board, 'B', self.count), 'X')
+    return '\n'.join(map(''.join, s)).replace('0', ' ')
 
   def state_log(self):
     g = MineGame(self.board)
@@ -73,6 +71,8 @@ class MineGame(object):
 
   def json(self):
     return json.dumps(dict(
+      won=self.is_won,
+      lost=self.is_lost,
       shape=self.shape,
       board=self.board.tolist(),
       count=self.count.tolist(),

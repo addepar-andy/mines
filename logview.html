@@ -14,6 +14,15 @@
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
     </style>
+    <style>
+      #board > pre {
+        font-size: 36px;
+      }
+      #moves li.selected {
+        color: red;
+        font-weight: bold;
+      }
+    </style>
     <link href="bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -51,7 +60,13 @@
     </div>
 
     <div class="container">
-      <p>Click "Load Log" to load a game log!</p>
+      <div class="row">
+        <div class="span8" id="board">
+          <p>Click "Load Log" to load a game log!</p>
+        </div>
+        <div class="span4" id="moves">
+        </div>
+      </div>
     </div> <!-- /container -->
 
     <!-- Le javascript
@@ -62,6 +77,10 @@
     <script>
       (function(){
         var log = null;
+        var curmove = 0;
+        var size = null;
+        var autoplay = false;
+        var autoplay_speed = 0.5;
         $('#load-log-button').live('click', function(){
           $('input[type=file]').trigger('click');
           return false;
@@ -69,10 +88,84 @@
         $('input[type=file]').live('change', function(){
           var reader = new FileReader();
           reader.onload = function(e){
+            curmove = 0;
             log = JSON.parse(e.target.result);
-            console.log(log);
+            size = log.log.length;
+            $('#board').empty().append($('<pre></pre>')).append(
+              '<div id="controls" class="pagination pagination-centered"><ul>' +
+              '<li><a href="#" id="first-button">«</a></li>' +
+              '<li><a href="#" id="prev-button">‹</a></li>' +
+              '<li><a href="#" id="autoplay-button">Autoplay</a></li>' +
+              '<li><a href="#" id="next-button">›</a></li>' +
+              '<li><a href="#" id="last-button">»</a></li>' +
+              '</ul></div>'
+            );
+            $('#moves')
+              .empty()
+              .append('<h3>' + (log.won ? 'Won in ' : (log.lost ? 'Lost in ' : '')) + size + ' turns</h3>')
+              .append($('<ol>' + $.map(log.moves, function(v){ return '<li>' + v[0] + ',' + v[1] + '</li>'; }).join('\n') + '</ol>'));
+            show_move(0);
           };
           reader.readAsText($('input[type=file]')[0].files[0]);
+        });
+        var show_move = function(i){
+          if(i < size && i >= 0){
+            $('#board > pre').empty().text(log.log[curmove]);
+            $('#moves > ol').children().removeClass('selected');
+            $($('#moves > ol').children()[i]).addClass('selected');
+          }
+        }
+        var go_first = function(){
+          curmove = 0;
+          show_move(curmove);
+          return false;
+        };
+        var go_next = function(){
+          if(curmove < size - 1){
+            curmove += 1;
+            show_move(curmove);
+          }
+          return false;
+        };
+        var go_prev = function(){
+          if(curmove > 0){
+            curmove -= 1;
+            show_move(curmove);
+          }
+          return false;
+        };
+        var go_last = function(){
+          curmove = size - 1;
+          show_move(curmove);
+          return false;
+        };
+        var go_autoplay = function(){
+          if(autoplay && curmove < size - 1){
+            var last = curmove == size - 2;
+            window.setTimeout(function(){
+              if(autoplay){ 
+                go_next(); 
+                if(last){ 
+                  autoplay = false; 
+                }
+              }
+            }, 1000 * autoplay_speed);
+            if(!last) {
+              window.setTimeout(go_autoplay, 1000 * autoplay_speed);
+            }
+          }
+        }
+        $('#first-button').live('click', function() { autoplay = false; go_first(); });
+        $('#next-button').live('click', function() { autoplay = false; go_next(); });
+        $('#prev-button').live('click', function() { autoplay = false; go_prev(); });
+        $('#last-button').live('click', function() { autoplay = false; go_last(); });
+        $('#autoplay-button').live('click', function(){
+          if(autoplay){
+            autoplay = false;
+          } else {
+            autoplay = true;
+            go_autoplay();
+          }
         });
       })();
     </script>
