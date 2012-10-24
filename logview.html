@@ -112,15 +112,19 @@
             curmove = 0;
             log = JSON.parse(e.target.result);
             size = log.log.length;
-            $('#left').empty().append($('<div id="board"></div>')).append(
-              '<div id="controls" class="pagination pagination-centered"><ul>' +
-              '<li><a href="#" id="first-button">«</a></li>' +
-              '<li><a href="#" id="prev-button">‹</a></li>' +
-              '<li><a href="#" id="autoplay-button">Autoplay</a></li>' +
-              '<li><a href="#" id="next-button">›</a></li>' +
-              '<li><a href="#" id="last-button">»</a></li>' +
-              '</ul></div>'
-            );
+            $('#left')
+                .empty()
+                .append($('<h3>' + log.shape[0] + ' x ' + log.shape[1] + ' board, ' + log.nmines + ' mines</h3>'))
+                .append($('<div id="board"></div>'))
+                .append(
+                  '<div id="controls" class="pagination pagination-centered"><ul>' +
+                  '<li><a href="#" id="first-button">«</a></li>' +
+                  '<li><a href="#" id="prev-button">‹</a></li>' +
+                  '<li><a href="#" id="autoplay-button">Autoplay</a></li>' +
+                  '<li><a href="#" id="next-button">›</a></li>' +
+                  '<li><a href="#" id="last-button">»</a></li>' +
+                  '</ul></div>'
+                );
             $('#moves')
               .empty()
               .append('<h3>' + (log.won ? 'Won in ' : (log.lost ? 'Lost in ' : '')) + size + ' turns</h3>')

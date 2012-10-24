@@ -71,6 +71,7 @@ class MineGame(object):
 
   def json(self):
     return json.dumps(dict(
+      nmines=int(self.board.sum()),
       won=self.is_won,
       lost=self.is_lost,
       shape=self.shape,
