@@ -15,8 +15,29 @@
       }
     </style>
     <style>
-      #board > pre {
-        font-size: 36px;
+      #board span.tile {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+        line-height: 40px;
+        margin: 1px;
+        background-color: #bbb;
+        color: #bbb;
+        text-align: center;
+      }
+      #board span.tileX {
+        background-color: #2FA4E7;
+        color: #2FA4E7;
+      }
+      #board span.tile1, #board span.tile2, #board span.tile3, #board span.tile4, #board span.tile5, 
+      #board span.tile6, #board span.tile7, #board span.tile8 {
+        background-color: #bbb;
+        color: #033C73;
+      }
+      #board span.tileB {
+        background-color: red;
+        color: red;
       }
       #moves li.selected {
         color: red;
@@ -61,7 +82,7 @@
 
     <div class="container">
       <div class="row">
-        <div class="span8" id="board">
+        <div class="span8" id="left">
           <p>Click "Load Log" to load a game log!</p>
         </div>
         <div class="span4" id="moves">
@@ -91,7 +112,7 @@
             curmove = 0;
             log = JSON.parse(e.target.result);
             size = log.log.length;
-            $('#board').empty().append($('<pre></pre>')).append(
+            $('#left').empty().append($('<div id="board"></div>')).append(
               '<div id="controls" class="pagination pagination-centered"><ul>' +
               '<li><a href="#" id="first-button">«</a></li>' +
               '<li><a href="#" id="prev-button">‹</a></li>' +
@@ -108,9 +129,22 @@
           };
           reader.readAsText($('input[type=file]')[0].files[0]);
         });
+        var move_html = function(txt) {
+          var out = "";
+          var lines = txt.split("\n");
+          for(var i = 0; i < lines.length; i++){
+            var line = lines[i];
+            for(var j = 0; j < line.length; j++){
+              var ch = line.charAt(j);
+              out += '<span class="tile tile' + ch.replace(' ', '') + '">' + ch.replace(' ', '&nbsp;') + '</span>';
+            }
+            out += '<br>';
+          }
+          return out;
+        };
         var show_move = function(i){
           if(i < size && i >= 0){
-            $('#board > pre').empty().text(log.log[curmove]);
+            $('#board').empty().html(move_html(log.log[curmove]));
             $('#moves > ol').children().removeClass('selected');
             $($('#moves > ol').children()[i]).addClass('selected');
           }
